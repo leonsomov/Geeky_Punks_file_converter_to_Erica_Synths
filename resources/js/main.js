@@ -253,8 +253,29 @@ function closeManualModal() {
   elements.manualModal.hidden = true;
 }
 
-function appendExportItem(message) {
-  if (!elements.exportList || !message) {
+function appendExportItem(item, options = {}) {
+  if (!elements.exportList) {
+    return false;
+  }
+
+  let label = "";
+  let href = "";
+  let downloadName = "";
+  let onClick = null;
+
+  if (typeof item === "string") {
+    label = item;
+    href = options.href || "";
+    downloadName = options.downloadName || "";
+    onClick = typeof options.onClick === "function" ? options.onClick : null;
+  } else if (item && typeof item === "object") {
+    label = item.label || "";
+    href = item.href || "";
+    downloadName = item.downloadName || "";
+    onClick = typeof item.onClick === "function" ? item.onClick : null;
+  }
+
+  if (!label) {
     return false;
   }
 
@@ -265,7 +286,29 @@ function appendExportItem(message) {
 
   const row = document.createElement("li");
   row.className = "export-item";
-  row.textContent = message;
+  if (href) {
+    const link = document.createElement("a");
+    link.className = "export-link";
+    link.href = href;
+    if (downloadName) {
+      link.download = downloadName;
+    }
+    link.textContent = label;
+    row.append(link);
+  } else if (onClick) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "export-link export-link-button";
+    button.textContent = label;
+    button.addEventListener("click", () => {
+      Promise.resolve(onClick()).catch((error) => {
+        logLine(`Could not open export: ${errorToText(error)}`, "error");
+      });
+    });
+    row.append(button);
+  } else {
+    row.textContent = label;
+  }
   elements.exportList.prepend(row);
 
   if (elements.exportList.childElementCount > 80) {
@@ -616,7 +659,11 @@ async function buildDesktopKit(plan) {
     logLine(`Saved ${outputPath}`, "success");
   }
 
-  return appendExportItem(plan.folderName) ? 1 : 0;
+  return appendExportItem(plan.folderName, {
+    onClick: () => openDesktopPath(kitFolder),
+  })
+    ? 1
+    : 0;
 }
 
 async function ensureDesktopDirectory(path) {
@@ -631,6 +678,7 @@ async function buildWebKit(plan) {
   const kitFolderHandle = state.outputDirHandle
     ? await state.outputDirHandle.getDirectoryHandle(plan.folderName, { create: true })
     : null;
+  const fallbackDownloads = [];
 
   for (let i = 0; i < plan.entries.length; i += 1) {
     const entry = plan.entries[i];
@@ -650,13 +698,33 @@ async function buildWebKit(plan) {
     } else {
       const fallbackName = entry.outputName;
       triggerBrowserDownload(blob, fallbackName);
+      fallbackDownloads.push({ blob, fileName: fallbackName });
       logLine(`Downloaded ${fallbackName}`, "success");
     }
 
     setProgress(true, ((i + 1) / plan.entries.length) * 100, `Kit Maker ${i + 1}/${plan.entries.length}`);
   }
 
+  if (fallbackDownloads.length > 0) {
+    return appendExportItem(plan.folderName, {
+      onClick: () => {
+        fallbackDownloads.forEach(({ blob, fileName }) => {
+          triggerBrowserDownload(blob, fileName);
+        });
+      },
+    })
+      ? 1
+      : 0;
+  }
+
   return appendExportItem(plan.folderName) ? 1 : 0;
+}
+
+async function openDesktopPath(targetPath) {
+  if (!state.desktopMode || !targetPath) {
+    return;
+  }
+  await Neutralino.os.open(targetPath);
 }
 
 async function ensureDesktopFfmpeg() {
@@ -706,7 +774,11 @@ async function convertDesktopFiles() {
 
     setProgress(true, ((i + 1) / state.files.length) * 100, `Processing ${i + 1}/${state.files.length}`);
     logLine(`Saved ${output}`, "success");
-    if (appendExportItem(output)) {
+    if (
+      appendExportItem(getFilenameFromPath(output), {
+        onClick: () => openDesktopPath(output),
+      })
+    ) {
       exportedCount += 1;
     }
   }
@@ -964,9 +1036,14 @@ async function convertWebFiles() {
         exportedCount += 1;
       }
     } else {
-      triggerBrowserDownload(blob, outName);
+      const downloadHref = triggerBrowserDownload(blob, outName, { revokeAfterMs: 0 });
       logLine(`Downloaded ${outName}`, "success");
-      if (appendExportItem(outName)) {
+      if (
+        appendExportItem(outName, {
+          href: downloadHref,
+          downloadName: outName,
+        })
+      ) {
         exportedCount += 1;
       }
     }
@@ -1057,13 +1134,19 @@ async function writeWebOutputToFolder(blob, fileName, folderHandle = state.outpu
   await writable.close();
 }
 
-function triggerBrowserDownload(blob, fileName) {
+function triggerBrowserDownload(blob, fileName, options = {}) {
+  const revokeAfterMs = Number.isFinite(options.revokeAfterMs) ? options.revokeAfterMs : 60000;
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
   anchor.href = url;
   anchor.download = fileName;
   anchor.click();
-  URL.revokeObjectURL(url);
+  if (revokeAfterMs > 0) {
+    window.setTimeout(() => {
+      URL.revokeObjectURL(url);
+    }, revokeAfterMs);
+  }
+  return url;
 }
 
 function askConflictChoice(fileName) {

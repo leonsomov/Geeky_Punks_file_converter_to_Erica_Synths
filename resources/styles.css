@@ -405,6 +405,27 @@ h3 {
   border-top: 1px solid rgba(13, 13, 13, 0.16);
 }
 
+.export-link {
+  color: var(--ink);
+  text-decoration: underline;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.export-link:hover {
+  color: var(--muted);
+}
+
+.export-link-button {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
 .export-empty {
   text-align: center;
 }
