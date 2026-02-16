@@ -1,9 +1,14 @@
+import { buildKitMakerPlan, KIT_MAKER_LIMIT_WARNING } from "./kit-maker.mjs";
+
 const TARGET_SAMPLE_RATE = "48000";
 const TARGET_CHANNELS = "1";
 const TARGET_SAMPLE_FORMAT = "s16";
 const TARGET_EXTENSION = "wav";
 const NORMALIZE_FILTER = "loudnorm=I=-14:LRA=11:TP=-1.0";
 const CANCELLED_ERROR_MESSAGE = "Conversion cancelled by user.";
+const CONVERT_SUCCESS_MESSAGE = "Ready, like it should be.";
+const KIT_SUCCESS_MESSAGE = "Ribbit. Export ready. 🐸";
+const TOAST_TIMEOUT_MS = 3000;
 const FFMPEG_LOCAL_ASSETS = {
   ffmpegModule: new URL("../vendor/ffmpeg/index.js", import.meta.url).href,
   ffmpegWorker: new URL("../vendor/ffmpeg/worker.js", import.meta.url).href,
@@ -16,6 +21,7 @@ const state = {
   desktopMode: typeof window.Neutralino !== "undefined" && typeof window.NL_OS === "string",
   files: [],
   converting: false,
+  kitMaking: false,
   overwriteAll: false,
   ffmpegExecutable: null,
   outputDirHandle: null,
@@ -27,6 +33,9 @@ const state = {
 const elements = {
   pickFilesBtn: document.getElementById("pickFilesBtn"),
   clearFilesBtn: document.getElementById("clearFilesBtn"),
+  manualBtn: document.getElementById("manualBtn"),
+  manualModal: document.getElementById("manualModal"),
+  manualCloseBtn: document.getElementById("manualCloseBtn"),
   normalizeToggle: document.getElementById("normalizeToggle"),
   pickWebOutputBtn: document.getElementById("pickWebOutputBtn"),
   outputHint: document.getElementById("outputHint"),
@@ -37,6 +46,9 @@ const elements = {
   progressText: document.getElementById("progressText"),
   statusText: document.getElementById("statusText"),
   startBtn: document.getElementById("startBtn"),
+  kitMakerBtn: document.getElementById("kitMakerBtn"),
+  kitMakerWarning: document.getElementById("kitMakerWarning"),
+  exportList: document.getElementById("exportList"),
   log: document.getElementById("log"),
   webFileInput: document.getElementById("webFileInput"),
   conflictModal: document.getElementById("conflictModal"),
@@ -87,15 +99,29 @@ function configureDesktopMenu() {
 function bindUI() {
   elements.pickFilesBtn.addEventListener("click", onPickFilesClicked);
   elements.clearFilesBtn.addEventListener("click", () => {
-    if (state.converting) {
+    if (state.converting || state.kitMaking) {
       return;
     }
     state.files = [];
+    setKitMakerWarning("");
     renderFileList();
     logLine("Selection cleared.");
   });
 
   elements.startBtn.addEventListener("click", convertAllFiles);
+  elements.kitMakerBtn?.addEventListener("click", runKitMaker);
+  elements.manualBtn?.addEventListener("click", openManualModal);
+  elements.manualCloseBtn?.addEventListener("click", closeManualModal);
+  elements.manualModal?.addEventListener("click", (event) => {
+    if (event.target === elements.manualModal) {
+      closeManualModal();
+    }
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && elements.manualModal && !elements.manualModal.hidden) {
+      closeManualModal();
+    }
+  });
 
   elements.webFileInput.addEventListener("change", () => {
     if (!elements.webFileInput.files) {
@@ -181,13 +207,127 @@ function detectBrowserSystem() {
 
 function renderFileList() {
   const count = state.files.length;
+  const busy = state.converting || state.kitMaking;
+  if (count <= 10 && !state.kitMaking) {
+    setKitMakerWarning("");
+  }
   elements.fileCount.textContent = `${count} file${count === 1 ? "" : "s"} selected`;
-  elements.startBtn.disabled = state.converting || count === 0;
+  elements.startBtn.disabled = busy || count === 0;
   elements.startBtn.textContent = state.converting ? "Processing..." : "Convert Files";
-  elements.pickFilesBtn.disabled = state.converting;
-  elements.clearFilesBtn.disabled = state.converting;
-  elements.normalizeToggle.disabled = state.converting;
-  elements.pickWebOutputBtn.disabled = state.converting;
+  if (elements.kitMakerBtn) {
+    elements.kitMakerBtn.disabled = busy || count === 0;
+    elements.kitMakerBtn.textContent = state.kitMaking ? "Kit Maker..." : "Kit Maker";
+  }
+  elements.pickFilesBtn.disabled = busy;
+  elements.clearFilesBtn.disabled = busy;
+  elements.normalizeToggle.disabled = busy;
+  elements.pickWebOutputBtn.disabled = busy;
+}
+
+function setKitMakerWarning(message) {
+  if (!elements.kitMakerWarning) {
+    return;
+  }
+
+  if (!message) {
+    elements.kitMakerWarning.hidden = true;
+    elements.kitMakerWarning.textContent = "";
+    return;
+  }
+
+  elements.kitMakerWarning.hidden = false;
+  elements.kitMakerWarning.textContent = message;
+}
+
+function openManualModal() {
+  if (!elements.manualModal) {
+    return;
+  }
+  elements.manualModal.hidden = false;
+}
+
+function closeManualModal() {
+  if (!elements.manualModal) {
+    return;
+  }
+  elements.manualModal.hidden = true;
+}
+
+function appendExportItem(message) {
+  if (!elements.exportList || !message) {
+    return false;
+  }
+
+  const empty = elements.exportList.querySelector("[data-export-empty]");
+  if (empty) {
+    empty.remove();
+  }
+
+  const row = document.createElement("li");
+  row.className = "export-item";
+  row.textContent = message;
+  elements.exportList.prepend(row);
+
+  if (elements.exportList.childElementCount > 80) {
+    elements.exportList.lastElementChild?.remove();
+  }
+
+  return true;
+}
+
+function showToast(message, kind = "success") {
+  if (!message) {
+    return;
+  }
+
+  let host = document.getElementById("toastHost");
+  if (!host) {
+    host = document.createElement("div");
+    host.id = "toastHost";
+    host.className = "toast-host";
+    host.setAttribute("role", "status");
+    host.setAttribute("aria-live", "polite");
+    host.setAttribute("aria-atomic", "true");
+    document.body.append(host);
+  }
+
+  const toast = document.createElement("div");
+  toast.className = `toast toast-${kind}`;
+  toast.textContent = message;
+  toast.tabIndex = 0;
+  host.append(toast);
+
+  requestAnimationFrame(() => {
+    toast.classList.add("toast-visible");
+  });
+
+  let removed = false;
+  const removeToast = () => {
+    if (removed) {
+      return;
+    }
+    removed = true;
+    toast.classList.remove("toast-visible");
+    toast.addEventListener(
+      "transitionend",
+      () => {
+        toast.remove();
+      },
+      { once: true }
+    );
+  };
+
+  const onToastKeyDown = (event) => {
+    if (event.key === "Enter" || event.key === " " || event.key === "Escape") {
+      event.preventDefault();
+      removeToast();
+    }
+  };
+
+  toast.addEventListener("click", removeToast);
+  toast.addEventListener("keydown", onToastKeyDown);
+
+  window.setTimeout(removeToast, TOAST_TIMEOUT_MS);
 }
 
 function logLine(message, kind = "info") {
@@ -371,7 +511,7 @@ async function pickWebOutputFolder() {
 }
 
 async function convertAllFiles() {
-  if (state.converting || state.files.length === 0) {
+  if (state.converting || state.kitMaking || state.files.length === 0) {
     return;
   }
 
@@ -382,15 +522,19 @@ async function convertAllFiles() {
   renderFileList();
 
   try {
+    let exportedCount = 0;
     if (state.desktopMode) {
       await ensureDesktopFfmpeg();
-      await convertDesktopFiles();
+      exportedCount = await convertDesktopFiles();
     } else {
       await ensureWebFfmpeg();
-      await convertWebFiles();
+      exportedCount = await convertWebFiles();
     }
 
-    logLine("All conversions finished.", "success");
+    if (exportedCount > 0) {
+      logLine(CONVERT_SUCCESS_MESSAGE, "success");
+      showToast(CONVERT_SUCCESS_MESSAGE, "success");
+    }
   } catch (error) {
     const message = errorToText(error);
     if (message === CANCELLED_ERROR_MESSAGE) {
@@ -404,6 +548,120 @@ async function convertAllFiles() {
     setProgress(false, 0, "");
     renderFileList();
   }
+}
+
+async function runKitMaker() {
+  if (state.converting || state.kitMaking || state.files.length === 0) {
+    return;
+  }
+
+  const plan = buildKitMakerPlan(state.files);
+  if (plan.blocked) {
+    if (plan.warning) {
+      const warningText = KIT_MAKER_LIMIT_WARNING;
+      setKitMakerWarning(warningText);
+      setStatus(warningText, "error");
+      logLine(warningText, "error");
+      showToast(warningText, "error");
+    }
+    return;
+  }
+
+  state.kitMaking = true;
+  setKitMakerWarning("");
+  setProgress(true, 0, `Kit Maker 0/${plan.entries.length}`);
+  setStatus("Building kit...", "info");
+  renderFileList();
+
+  try {
+    let exportedCount = 0;
+    if (state.desktopMode) {
+      await ensureDesktopFfmpeg();
+      exportedCount = await buildDesktopKit(plan);
+    } else {
+      await ensureWebFfmpeg();
+      exportedCount = await buildWebKit(plan);
+    }
+    if (exportedCount > 0) {
+      logLine(KIT_SUCCESS_MESSAGE, "success");
+      showToast(KIT_SUCCESS_MESSAGE, "success");
+    }
+  } catch (error) {
+    logLine(`Kit Maker stopped: ${errorToText(error)}`, "error");
+  } finally {
+    state.kitMaking = false;
+    setProgress(false, 0, "");
+    renderFileList();
+  }
+}
+
+async function buildDesktopKit(plan) {
+  const normalize = elements.normalizeToggle.checked;
+  const first = plan.entries[0]?.file;
+  if (!first || !first.desktopPath) {
+    throw new Error("No files available for Kit Maker.");
+  }
+
+  const parts = await Neutralino.filesystem.getPathParts(first.desktopPath);
+  const kitFolder = await Neutralino.filesystem.getJoinedPath(parts.parentPath, plan.folderName);
+  await ensureDesktopDirectory(kitFolder);
+
+  for (let i = 0; i < plan.entries.length; i += 1) {
+    const entry = plan.entries[i];
+    const outputPath = await Neutralino.filesystem.getJoinedPath(kitFolder, entry.outputName);
+    setProgress(true, (i / plan.entries.length) * 100, `Kit Maker ${i + 1}/${plan.entries.length}`);
+    logLine(`Kit Maker [${i + 1}/${plan.entries.length}] ${entry.file.name} -> ${entry.outputName}`);
+    await runDesktopConversion(entry.file.desktopPath, outputPath, normalize);
+    setProgress(true, ((i + 1) / plan.entries.length) * 100, `Kit Maker ${i + 1}/${plan.entries.length}`);
+    logLine(`Saved ${outputPath}`, "success");
+  }
+
+  const summary = `${plan.folderName} (${plan.entries.length} file${plan.entries.length === 1 ? "" : "s"})`;
+  return appendExportItem(summary) ? 1 : 0;
+}
+
+async function ensureDesktopDirectory(path) {
+  if (await desktopPathExists(path)) {
+    return;
+  }
+  await Neutralino.filesystem.createDirectory(path);
+}
+
+async function buildWebKit(plan) {
+  const normalize = elements.normalizeToggle.checked;
+  const kitFolderHandle = state.outputDirHandle
+    ? await state.outputDirHandle.getDirectoryHandle(plan.folderName, { create: true })
+    : null;
+
+  for (let i = 0; i < plan.entries.length; i += 1) {
+    const entry = plan.entries[i];
+    setProgress(true, (i / plan.entries.length) * 100, `Kit Maker ${i + 1}/${plan.entries.length}`);
+    logLine(`Kit Maker [${i + 1}/${plan.entries.length}] ${entry.file.name} -> ${entry.outputName}`);
+
+    const blob = await convertWebFileToBlob(
+      entry.file.webFile,
+      `kit_input_${i}_${entry.file.name}`,
+      `kit_output_${i}.${TARGET_EXTENSION}`,
+      normalize
+    );
+
+    if (kitFolderHandle) {
+      await writeWebOutputToFolder(blob, entry.outputName, kitFolderHandle);
+      logLine(`Saved ${plan.folderName}/${entry.outputName}`, "success");
+    } else {
+      const fallbackName = `${plan.folderName}_${entry.outputName}`;
+      triggerBrowserDownload(blob, fallbackName);
+      logLine(`Downloaded ${fallbackName}`, "success");
+    }
+
+    setProgress(true, ((i + 1) / plan.entries.length) * 100, `Kit Maker ${i + 1}/${plan.entries.length}`);
+  }
+
+  if (kitFolderHandle) {
+    return appendExportItem(`${plan.folderName} (${plan.entries.length} file${plan.entries.length === 1 ? "" : "s"})`) ? 1 : 0;
+  }
+
+  return appendExportItem(`${plan.folderName} (${plan.entries.length} downloads)`) ? 1 : 0;
 }
 
 async function ensureDesktopFfmpeg() {
@@ -432,6 +690,7 @@ async function ensureDesktopFfmpeg() {
 
 async function convertDesktopFiles() {
   const normalize = elements.normalizeToggle.checked;
+  let exportedCount = 0;
 
   for (let i = 0; i < state.files.length; i += 1) {
     const item = state.files[i];
@@ -452,7 +711,12 @@ async function convertDesktopFiles() {
 
     setProgress(true, ((i + 1) / state.files.length) * 100, `Processing ${i + 1}/${state.files.length}`);
     logLine(`Saved ${output}`, "success");
+    if (appendExportItem(output)) {
+      exportedCount += 1;
+    }
   }
+
+  return exportedCount;
 }
 
 async function chooseDesktopOutputPath(inputPath) {
@@ -519,6 +783,15 @@ async function desktopPathExists(path) {
   }
 }
 
+function buildConversionArgs(inputPath, outputPath, normalize) {
+  const args = ["-i", inputPath, "-ac", TARGET_CHANNELS, "-ar", TARGET_SAMPLE_RATE, "-sample_fmt", TARGET_SAMPLE_FORMAT];
+  if (normalize) {
+    args.push("-af", NORMALIZE_FILTER);
+  }
+  args.push(outputPath);
+  return args;
+}
+
 async function runDesktopConversion(inputPath, outputPath, normalize) {
   const args = [
     state.ffmpegExecutable || "ffmpeg",
@@ -526,21 +799,8 @@ async function runDesktopConversion(inputPath, outputPath, normalize) {
     "-loglevel",
     "error",
     "-y",
-    "-i",
-    inputPath,
-    "-ac",
-    TARGET_CHANNELS,
-    "-ar",
-    TARGET_SAMPLE_RATE,
-    "-sample_fmt",
-    TARGET_SAMPLE_FORMAT,
+    ...buildConversionArgs(inputPath, outputPath, normalize),
   ];
-
-  if (normalize) {
-    args.push("-af", NORMALIZE_FILTER);
-  }
-
-  args.push(outputPath);
 
   const command = args.map((arg) => quoteShellArg(String(arg))).join(" ");
 
@@ -690,40 +950,14 @@ async function importFromCandidates(urls, label) {
 async function convertWebFiles() {
   const normalize = elements.normalizeToggle.checked;
   const namesReserved = new Set();
+  let exportedCount = 0;
 
   for (let i = 0; i < state.files.length; i += 1) {
     const item = state.files[i];
-    const virtualInput = `input_${i}_${item.name}`;
-    const virtualOutput = `output_${i}.${TARGET_EXTENSION}`;
 
     setProgress(true, (i / state.files.length) * 100, `Processing ${i + 1}/${state.files.length}`);
     logLine(`Converting [${i + 1}/${state.files.length}] ${item.name}`);
-
-    await state.ffmpegWeb.writeFile(virtualInput, await state.webFetchFile(item.webFile));
-
-    const args = [
-      "-hide_banner",
-      "-loglevel",
-      "error",
-      "-i",
-      virtualInput,
-      "-ac",
-      TARGET_CHANNELS,
-      "-ar",
-      TARGET_SAMPLE_RATE,
-      "-sample_fmt",
-      TARGET_SAMPLE_FORMAT,
-    ];
-
-    if (normalize) {
-      args.push("-af", NORMALIZE_FILTER);
-    }
-
-    args.push(virtualOutput);
-
-    await state.ffmpegWeb.exec(args);
-    const bytes = await state.ffmpegWeb.readFile(virtualOutput);
-    const blob = new Blob([bytes], { type: "audio/wav" });
+    const blob = await convertWebFileToBlob(item.webFile, `input_${i}_${item.name}`, `output_${i}.${TARGET_EXTENSION}`, normalize);
 
     const outName = await chooseWebOutputName(item.name, namesReserved);
     namesReserved.add(outName);
@@ -731,16 +965,32 @@ async function convertWebFiles() {
     if (state.outputDirHandle) {
       await writeWebOutputToFolder(blob, outName);
       logLine(`Saved ${outName}`, "success");
+      if (appendExportItem(outName)) {
+        exportedCount += 1;
+      }
     } else {
       triggerBrowserDownload(blob, outName);
       logLine(`Downloaded ${outName}`, "success");
+      if (appendExportItem(outName)) {
+        exportedCount += 1;
+      }
     }
 
-    await Promise.allSettled([
-      state.ffmpegWeb.deleteFile(virtualInput),
-      state.ffmpegWeb.deleteFile(virtualOutput),
-    ]);
     setProgress(true, ((i + 1) / state.files.length) * 100, `Processing ${i + 1}/${state.files.length}`);
+  }
+
+  return exportedCount;
+}
+
+async function convertWebFileToBlob(webFile, virtualInput, virtualOutput, normalize) {
+  await state.ffmpegWeb.writeFile(virtualInput, await state.webFetchFile(webFile));
+  const args = ["-hide_banner", "-loglevel", "error", ...buildConversionArgs(virtualInput, virtualOutput, normalize)];
+  try {
+    await state.ffmpegWeb.exec(args);
+    const bytes = await state.ffmpegWeb.readFile(virtualOutput);
+    return new Blob([bytes], { type: "audio/wav" });
+  } finally {
+    await Promise.allSettled([state.ffmpegWeb.deleteFile(virtualInput), state.ffmpegWeb.deleteFile(virtualOutput)]);
   }
 }
 
@@ -802,8 +1052,11 @@ async function webPathExists(folderHandle, fileName) {
   }
 }
 
-async function writeWebOutputToFolder(blob, fileName) {
-  const fileHandle = await state.outputDirHandle.getFileHandle(fileName, { create: true });
+async function writeWebOutputToFolder(blob, fileName, folderHandle = state.outputDirHandle) {
+  if (!folderHandle) {
+    throw new Error("No output folder selected.");
+  }
+  const fileHandle = await folderHandle.getFileHandle(fileName, { create: true });
   const writable = await fileHandle.createWritable();
   await writable.write(blob);
   await writable.close();

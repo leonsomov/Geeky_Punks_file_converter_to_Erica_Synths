@@ -23,6 +23,7 @@
         <div class="control-row">
           <button id="pickFilesBtn" class="btn btn-primary" type="button">Import Audio</button>
           <button id="clearFilesBtn" class="btn btn-secondary" type="button">Clear</button>
+          <button id="manualBtn" class="btn btn-secondary" type="button">Manual</button>
           <button id="pickWebOutputBtn" class="btn btn-secondary" type="button" hidden>Choose Output Folder</button>
         </div>
 
@@ -35,6 +36,11 @@
             <span>Normalize</span>
           </label>
         </div>
+        <div class="kit-maker-row">
+          <button id="kitMakerBtn" class="btn btn-secondary" type="button" disabled>Kit Maker</button>
+        </div>
+        <p class="kit-maker-help">Makes one Bullfrog Drums kit folder. Numbers your samples 0 to 9.</p>
+        <p id="kitMakerWarning" class="kit-maker-warning" hidden>Kit Maker supports up to 10 samples. Please select 10 or fewer.</p>
         <p class="format-chip">TARGET: MONO / 48KHZ / 16-BIT WAV</p>
         <p id="fileCount" class="copy">0 files selected</p>
         <div id="progressWrap" class="progress-wrap" hidden>
@@ -44,6 +50,14 @@
           <p id="progressText" class="progress-text">Processing...</p>
         </div>
         <p id="statusText" class="status-text">Ready.</p>
+      </section>
+
+      <section class="panel download-panel">
+        <h2>Downloads</h2>
+        <p class="copy">Exports from this session.</p>
+        <ul id="exportList" class="export-list" aria-live="polite">
+          <li class="export-empty" data-export-empty>No exports yet.</li>
+        </ul>
       </section>
     </main>
 
@@ -57,6 +71,24 @@
           <button type="button" class="btn btn-secondary" data-decision="skip">Skip</button>
           <button type="button" class="btn btn-secondary" data-decision="cancel">Cancel</button>
         </div>
+      </div>
+    </div>
+
+    <div id="manualModal" class="modal" hidden>
+      <div class="modal-card manual-card" role="dialog" aria-modal="true" aria-label="Manual">
+        <button id="manualCloseBtn" class="btn btn-secondary modal-close" type="button" aria-label="Close manual">X</button>
+        <pre class="manual-text">Manual
+
+Convert Files
+1) Import Audio
+2) Optional: enable Normalize
+3) Click Convert Files
+Output: converted WAV files in your output folder or browser downloads
+
+Kit Maker
+1) Select up to 10 files
+2) Click Kit Maker
+Output: folder H with samples numbered 0 to 9</pre>
       </div>
     </div>
 

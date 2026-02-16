@@ -5,9 +5,11 @@
   "description": "Geeky Punks converter",
   "scripts": {
     "desktop:dev": "neu run",
-    "desktop:build": "neu build --release",
-    "desktop:mac": "neu build --release --target mac_x64,mac_arm64",
-    "desktop:win": "neu build --release --target win_x64",
+    "manual:distribute": "node scripts/distribute-manual.mjs",
+    "desktop:build": "neu build --release && npm run manual:distribute",
+    "desktop:mac": "neu build --release && npm run manual:distribute",
+    "desktop:win": "neu build --release && npm run manual:distribute",
+    "desktop:linux": "neu build --release && npm run manual:distribute",
     "web": "python3 -m http.server 8080"
   },
   "devDependencies": {
