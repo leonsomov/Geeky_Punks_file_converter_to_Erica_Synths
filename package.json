@@ -1,0 +1,21 @@
+{
+  "name": "geeky-punks-converter",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Geeky Punks converter",
+  "scripts": {
+    "desktop:dev": "neu run",
+    "desktop:build": "neu build --release",
+    "desktop:mac": "neu build --release --target mac_x64,mac_arm64",
+    "desktop:win": "neu build --release --target win_x64",
+    "web": "python3 -m http.server 8080"
+  },
+  "devDependencies": {
+    "@neutralinojs/neu": "^11.7.0"
+  },
+  "dependencies": {
+    "@ffmpeg/core": "^0.12.9",
+    "@ffmpeg/ffmpeg": "^0.12.15",
+    "@ffmpeg/util": "^0.12.2"
+  }
+}

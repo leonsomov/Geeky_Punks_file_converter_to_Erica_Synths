@@ -1,0 +1,338 @@
+@font-face {
+  font-family: "Climate Ice";
+  src: url("./fonts/Climate-Ice-3.ttf") format("truetype");
+  font-display: swap;
+}
+
+:root {
+  color-scheme: light;
+  --page: #e4e1e2;
+  --ink: #0d0d0d;
+  --muted: #3d3d3d;
+  --panel: rgba(255, 255, 255, 0.16);
+  --panel-edge: #111111;
+  --track: rgba(255, 255, 255, 0.2);
+  --track-dark: rgba(255, 255, 255, 0.1);
+  --button: #121212;
+  --button-hover: #2b2b2b;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.file-input-native {
+  position: fixed;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: "Arial Narrow", "Avenir Next Condensed", "Helvetica Neue", sans-serif;
+  background: var(--page);
+  color: var(--ink);
+  padding: 0;
+  overflow: auto;
+}
+
+.app-shell {
+  width: 100%;
+  max-width: none;
+  padding: 10px;
+  border: 1px solid var(--ink);
+  background: var(--page);
+  text-align: center;
+  margin: 0;
+}
+
+.brand-head {
+  display: grid;
+  justify-items: center;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--ink);
+  text-align: center;
+}
+
+.brand-logo {
+  width: 74px;
+  height: auto;
+  display: block;
+}
+
+.brand-text h1 {
+  margin: 0;
+  font-size: 1.14rem;
+  line-height: 1;
+  font-family: "Climate Ice", "Arial Narrow", sans-serif;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.brand-text p {
+  margin: 2px 0 0;
+  font-size: 0.56rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--panel-edge);
+  border-radius: 0;
+  padding: 6px;
+  margin-bottom: 6px;
+  text-align: center;
+}
+
+.panel:last-of-type {
+  margin-bottom: 0;
+}
+
+.panel-main {
+  min-height: 0;
+}
+
+h2,
+h3 {
+  margin: 0 0 4px;
+  font-family: "Climate Ice", "Arial Narrow", sans-serif;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 0.92rem;
+}
+
+.copy {
+  margin: 0 0 6px;
+  color: var(--muted);
+  line-height: 1.38;
+  font-size: 0.83rem;
+}
+
+.hint {
+  margin: 8px 0 7px;
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.control-row,
+.action-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.action-row {
+  margin-top: 6px;
+  gap: 8px;
+}
+
+.btn {
+  border: 1px solid var(--ink);
+  border-radius: 0;
+  background: var(--button);
+  color: var(--page);
+  padding: 7px 8px;
+  font-size: 0.72rem;
+  font-family: "Climate Ice", "Arial Narrow", sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  cursor: pointer;
+  line-height: 1.1;
+}
+
+.btn:hover:not(:disabled) {
+  background: var(--button-hover);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: var(--track);
+  color: var(--ink);
+}
+
+.toggle-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--ink);
+  border-radius: 0;
+  background: var(--track);
+  color: var(--ink);
+  padding: 6px 8px;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+}
+
+.toggle-wrap input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+}
+
+.format-chip {
+  margin: 8px 0 0;
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.panel-main #fileCount {
+  margin: 8px 0 0;
+}
+
+.progress-wrap {
+  margin: 8px auto 0;
+  width: min(420px, 100%);
+}
+
+.progress-line {
+  width: 100%;
+  height: 8px;
+  border: 1px solid var(--ink);
+  background: rgba(255, 255, 255, 0.22);
+  overflow: hidden;
+}
+
+.progress-bar {
+  width: 0;
+  height: 100%;
+  background: var(--ink);
+  transition: width 0.16s ease;
+}
+
+.progress-text {
+  margin: 6px 0 0;
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.status-text {
+  margin: 8px 0 0;
+  font-size: 0.66rem;
+  line-height: 1.25;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.status-text.status-success {
+  color: #1f5d39;
+}
+
+.status-text.status-error {
+  color: #7b1c1c;
+}
+
+.download-panel {
+  text-align: center;
+}
+
+.download-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+  width: min(520px, 100%);
+  margin: 0 auto;
+}
+
+.download-grid .btn {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  text-decoration: none;
+  width: 100%;
+}
+
+.download-meta {
+  margin: 8px 0 0;
+  font-size: 0.68rem;
+  color: var(--muted);
+}
+
+.download-meta a {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 999;
+}
+
+.modal-card {
+  width: min(620px, 100%);
+  background: var(--page);
+  border: 1px solid var(--ink);
+  padding: 12px;
+}
+
+.modal-card p {
+  margin: 0 0 10px;
+  color: var(--muted);
+  font-size: 0.86rem;
+  text-align: center;
+}
+
+.modal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+}
+
+@media (max-width: 640px) {
+  .app-shell {
+    width: 100%;
+    padding: 8px;
+  }
+
+  .brand-logo {
+    width: 58px;
+  }
+
+  .brand-text h1 {
+    font-size: 0.96rem;
+  }
+}

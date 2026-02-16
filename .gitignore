@@ -1,0 +1,12 @@
+# Node
+node_modules
+.DS_Store
+
+# Neutralinojs binaries and builds
+/bin
+/dist
+
+# Neutralinojs related files
+.storage
+.tmp
+*.log

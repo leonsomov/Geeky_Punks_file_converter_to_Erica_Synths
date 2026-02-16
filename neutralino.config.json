@@ -1,0 +1,59 @@
+{
+  "$schema": "https://raw.githubusercontent.com/neutralinojs/neutralinojs/main/schemas/neutralino.config.schema.json",
+  "applicationId": "com.geekypunks.erica.converter",
+  "version": "1.0.0",
+  "defaultMode": "window",
+  "port": 0,
+  "documentRoot": "/resources/",
+  "url": "/",
+  "enableServer": true,
+  "enableNativeAPI": true,
+  "tokenSecurity": "one-time",
+  "logging": {
+    "enabled": true,
+    "writeToLogFile": false
+  },
+  "nativeAllowList": [
+    "app.*",
+    "os.*",
+    "filesystem.*",
+    "window.*",
+    "debug.log"
+  ],
+  "modes": {
+    "window": {
+      "title": "Geeky Punks converter",
+      "width": 860,
+      "height": 420,
+      "minWidth": 760,
+      "minHeight": 420,
+      "maxWidth": 980,
+      "maxHeight": 420,
+      "center": true,
+      "fullScreen": false,
+      "alwaysOnTop": false,
+      "icon": "/resources/icons/appIcon.png",
+      "enableInspector": false,
+      "borderless": false,
+      "maximize": false,
+      "hidden": false,
+      "resizable": false,
+      "useSavedState": false,
+      "exitProcessOnClose": true
+    },
+    "browser": {
+      "nativeBlockList": [
+        "filesystem.*",
+        "os.*"
+      ]
+    }
+  },
+  "cli": {
+    "binaryName": "geeky-punks-converter",
+    "resourcesPath": "/resources/",
+    "extensionsPath": "/extensions/",
+    "clientLibrary": "/resources/js/neutralino.js",
+    "binaryVersion": "6.5.0",
+    "clientVersion": "6.5.0"
+  }
+}

@@ -1,0 +1,7 @@
+2c15bf54f68e13d798c9581cb12ddbeb48c1e270eece1fed9853a6c4c131a51b  Geeky-Punks-converter-linux-arm64-v1.0.11.zip
+3902d37c06ee01c9d75c469ec944f8f0d214c055ea56653e97ed31b130b9e4cb  Geeky-Punks-converter-linux-armhf-v1.0.11.zip
+8e650e9432dae136c94834a5382bf5b7a5ed38248cdd23ed89298855837da49b  Geeky-Punks-converter-linux-x64-v1.0.11.zip
+6e1606ac55370fb9406cb2252a42a0e4f77b277cbd40239985b0f574abd2f3ee  Geeky-Punks-converter-mac-arm64-v1.0.11.zip
+6dfb00442a4102207862564be769c246fb4e7d68b0b79ae8d2d680500c3e9410  Geeky-Punks-converter-mac-intel-v1.0.11.zip
+4170d64bf209a1e2dfb2f853dca0334f7cb651913407746256ecee2fe976dcf6  Geeky-Punks-converter-mac-universal-v1.0.11.zip
+0b406a1d2022237e562b615466fae44010324463899a8b478dec60589da98f02  Geeky-Punks-converter-windows-x64-v1.0.11.zip

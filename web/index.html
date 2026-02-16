@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Geeky Punks converter</title>
+    <link rel="stylesheet" href="../resources/styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="brand-head">
+        <img src="../resources/icons/geeky-punks-logo.svg" alt="Geeky Punks logo" class="brand-logo" />
+        <div class="brand-text">
+          <h1>Geeky Punks converter</h1>
+          <p>The Sound of Everything</p>
+        </div>
+      </header>
+
+      <section class="panel panel-main">
+        <h2>Sample converter for Erica Synths instruments</h2>
+        <p class="copy">For Erica Synths users, we made a simple sample converter. Drop in any audio file, hit convert, and you get machine ready samples in seconds.</p>
+
+        <div class="control-row">
+          <button id="pickFilesBtn" class="btn btn-primary" type="button">Import Audio</button>
+          <button id="clearFilesBtn" class="btn btn-secondary" type="button">Clear</button>
+          <button id="pickWebOutputBtn" class="btn btn-secondary" type="button" hidden>Choose Output Folder</button>
+        </div>
+
+        <p id="outputHint" class="hint"></p>
+
+        <div class="action-row">
+          <button id="startBtn" class="btn btn-primary" type="button" disabled>Convert Files</button>
+          <label class="toggle-wrap" for="normalizeToggle">
+            <input id="normalizeToggle" type="checkbox" />
+            <span>Normalize</span>
+          </label>
+        </div>
+        <p class="format-chip">TARGET: MONO / 48KHZ / 16-BIT WAV</p>
+        <p id="fileCount" class="copy">0 files selected</p>
+        <div id="progressWrap" class="progress-wrap" hidden>
+          <div id="progressLine" class="progress-line" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+            <div id="progressBar" class="progress-bar"></div>
+          </div>
+          <p id="progressText" class="progress-text">Processing...</p>
+        </div>
+        <p id="statusText" class="status-text">Ready.</p>
+      </section>
+
+      <section class="panel download-panel">
+        <h2>Downloads</h2>
+        <p class="copy">Download desktop builds for each system.</p>
+        <div class="download-grid">
+          <a class="btn btn-secondary" href="./downloads/Geeky-Punks-converter-mac-universal-v1.0.11.zip" download>macOS Universal</a>
+          <a class="btn btn-secondary" href="./downloads/Geeky-Punks-converter-windows-x64-v1.0.11.zip" download>Windows x64</a>
+          <a class="btn btn-secondary" href="./downloads/Geeky-Punks-converter-linux-x64-v1.0.11.zip" download>Linux x64</a>
+          <a class="btn btn-secondary" href="./downloads/index.html">All Downloads</a>
+        </div>
+        <p class="download-meta">
+          Need ARM builds or checksums? Use
+          <a href="./downloads/index.html">All Downloads</a>.
+        </p>
+      </section>
+    </main>
+
+    <div id="conflictModal" class="modal" hidden>
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="conflictTitle">
+        <h3 id="conflictTitle">Output file already exists</h3>
+        <p id="conflictText"></p>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-primary" data-decision="overwrite-current">Overwrite current</button>
+          <button type="button" class="btn btn-primary" data-decision="overwrite-all">Overwrite all</button>
+          <button type="button" class="btn btn-secondary" data-decision="skip">Skip</button>
+          <button type="button" class="btn btn-secondary" data-decision="cancel">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <input id="webFileInput" class="file-input-native" type="file" multiple accept="audio/*" />
+
+    <script type="module" src="../resources/js/main.js"></script>
+  </body>
+</html>

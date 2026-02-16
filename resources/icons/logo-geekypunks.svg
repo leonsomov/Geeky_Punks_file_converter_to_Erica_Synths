@@ -1,0 +1,15 @@
+<svg width="420" height="96" viewBox="0 0 420 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="g" x1="26" y1="12" x2="396" y2="84" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F8F053"/>
+      <stop offset="0.5" stop-color="#FF7A00"/>
+      <stop offset="1" stop-color="#E3352E"/>
+    </linearGradient>
+  </defs>
+  <rect x="8" y="8" width="404" height="80" rx="18" fill="#101010"/>
+  <path d="M8 28C8 16.9543 16.9543 8 28 8H392C403.046 8 412 16.9543 412 28V40H8V28Z" fill="url(#g)"/>
+  <circle cx="44" cy="53" r="20" fill="#1B1B1B"/>
+  <path d="M35 51H53V56H35V51ZM40 46H48V50H40V46ZM40 57H48V62H40V57Z" fill="#F8F053"/>
+  <text x="74" y="45" fill="#0C0C0C" font-family="Orbitron, Arial, sans-serif" font-size="17" font-weight="700">GEEKY PUNKS</text>
+  <text x="74" y="70" fill="#F2F2F2" font-family="Rubik, Arial, sans-serif" font-size="19" font-weight="600">AUDIO FILES CONVERTER</text>
+</svg>
