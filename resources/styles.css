@@ -65,6 +65,34 @@ body {
   margin: 0;
 }
 
+body:not(.desktop-app) {
+  padding: 14px 0 28px;
+}
+
+body:not(.desktop-app) .app-shell {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 14px;
+  border: 1px solid var(--ink);
+  box-shadow: 0 10px 32px rgba(13, 13, 13, 0.12);
+}
+
+body:not(.desktop-app) .brand-head {
+  position: sticky;
+  top: 10px;
+  z-index: 30;
+  background: var(--page);
+  padding-top: 6px;
+}
+
+body:not(.desktop-app) .panel-main {
+  padding: 10px;
+}
+
+body:not(.desktop-app) .download-panel {
+  padding: 10px;
+}
+
 .brand-head {
   display: grid;
   justify-items: center;

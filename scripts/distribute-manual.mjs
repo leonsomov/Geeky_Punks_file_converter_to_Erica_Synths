@@ -1,4 +1,4 @@
-import { copyFile, readdir, stat, writeFile } from "node:fs/promises";
+import { copyFile, readdir, rm, stat, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { spawn } from "node:child_process";
@@ -14,10 +14,13 @@ const desktopOutputTargets = [
   path.join(rootDir, "release", "Geeky Punks converter (Linux x64)"),
   path.join(rootDir, "release", "Geeky Punks converter (Linux ARM64)"),
   path.join(rootDir, "release", "Geeky Punks converter (Linux ARMHF)"),
-  path.join(rootDir, "release", "Geeky Punks converter (macOS ARM).app", "Contents"),
-  path.join(rootDir, "release", "Geeky Punks converter (macOS Intel).app", "Contents"),
-  path.join(rootDir, "release", "Geeky Punks converter (macOS Universal).app", "Contents"),
   path.join(rootDir, "web", "downloads"),
+];
+
+const macBundleManualTargets = [
+  path.join(rootDir, "release", "Geeky Punks converter (macOS ARM).app", "Contents", "MANUAL.txt"),
+  path.join(rootDir, "release", "Geeky Punks converter (macOS Intel).app", "Contents", "MANUAL.txt"),
+  path.join(rootDir, "release", "Geeky Punks converter (macOS Universal).app", "Contents", "MANUAL.txt"),
 ];
 
 async function run() {
@@ -33,6 +36,12 @@ async function run() {
     const destination = path.join(dir, manualName);
     await copyFile(manualSource, destination);
     written.push(destination);
+  }
+
+  for (const macManual of macBundleManualTargets) {
+    if (existsSync(macManual)) {
+      await rm(macManual, { force: true });
+    }
   }
 
   const downloadDir = path.join(rootDir, "web", "downloads");

@@ -616,8 +616,7 @@ async function buildDesktopKit(plan) {
     logLine(`Saved ${outputPath}`, "success");
   }
 
-  const summary = `${plan.folderName} (${plan.entries.length} file${plan.entries.length === 1 ? "" : "s"})`;
-  return appendExportItem(summary) ? 1 : 0;
+  return appendExportItem(plan.folderName) ? 1 : 0;
 }
 
 async function ensureDesktopDirectory(path) {
@@ -649,7 +648,7 @@ async function buildWebKit(plan) {
       await writeWebOutputToFolder(blob, entry.outputName, kitFolderHandle);
       logLine(`Saved ${plan.folderName}/${entry.outputName}`, "success");
     } else {
-      const fallbackName = `${plan.folderName}_${entry.outputName}`;
+      const fallbackName = entry.outputName;
       triggerBrowserDownload(blob, fallbackName);
       logLine(`Downloaded ${fallbackName}`, "success");
     }
@@ -657,11 +656,7 @@ async function buildWebKit(plan) {
     setProgress(true, ((i + 1) / plan.entries.length) * 100, `Kit Maker ${i + 1}/${plan.entries.length}`);
   }
 
-  if (kitFolderHandle) {
-    return appendExportItem(`${plan.folderName} (${plan.entries.length} file${plan.entries.length === 1 ? "" : "s"})`) ? 1 : 0;
-  }
-
-  return appendExportItem(`${plan.folderName} (${plan.entries.length} downloads)`) ? 1 : 0;
+  return appendExportItem(plan.folderName) ? 1 : 0;
 }
 
 async function ensureDesktopFfmpeg() {
