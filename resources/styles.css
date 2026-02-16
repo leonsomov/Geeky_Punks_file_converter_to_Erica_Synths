@@ -48,6 +48,12 @@ body {
   overflow: auto;
 }
 
+.desktop-app,
+.desktop-app * {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
 .app-shell {
   width: 100%;
   max-width: none;

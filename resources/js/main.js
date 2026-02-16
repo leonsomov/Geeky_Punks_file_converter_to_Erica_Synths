@@ -49,6 +49,7 @@ const elements = {
 boot();
 
 function boot() {
+  document.body.classList.toggle("desktop-app", state.desktopMode);
   bindUI();
   updateContextHints();
   renderFileList();
