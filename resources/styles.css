@@ -147,10 +147,12 @@ h3 {
 .control-row,
 .action-row {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
-  justify-content: center;
-  gap: 6px;
+  justify-content: space-between;
+  gap: 8px;
+  width: min(760px, 100%);
+  margin: 0 auto;
 }
 
 .action-row {
@@ -378,6 +380,12 @@ h3 {
 }
 
 @media (max-width: 640px) {
+  .control-row,
+  .action-row {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
   .app-shell {
     width: 100%;
     padding: 8px;
