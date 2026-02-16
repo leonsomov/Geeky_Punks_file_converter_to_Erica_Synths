@@ -68,6 +68,7 @@ function boot() {
   document.body.classList.toggle("desktop-app", state.desktopMode);
   bindUI();
   updateContextHints();
+  logWebOutputCapabilityDebug();
   renderFileList();
 
   if (state.desktopMode) {
@@ -151,11 +152,11 @@ function updateContextHints() {
     return;
   }
 
-  const canPickFolder = canUseWebOutputFolderPicker();
-  elements.pickWebOutputBtn.hidden = !canPickFolder;
-  if (canPickFolder && state.outputDirHandle) {
+  const canChooseOutputFolder = canUseWebOutputFolderPicker();
+  elements.pickWebOutputBtn.hidden = !canChooseOutputFolder;
+  if (canChooseOutputFolder && state.outputDirHandle) {
     elements.outputHint.textContent = `Destination: ${state.outputDirHandle.name}`;
-  } else if (canPickFolder) {
+  } else if (canChooseOutputFolder) {
     elements.outputHint.textContent = WEB_OUTPUT_FOLDER_DEFAULT_HINT;
   } else {
     state.outputDirHandle = null;
@@ -175,6 +176,25 @@ function canUseWebOutputFolderPicker() {
     window.isSecureContext &&
     typeof window.showDirectoryPicker === "function"
   );
+}
+
+function logWebOutputCapabilityDebug() {
+  if (state.desktopMode) {
+    return;
+  }
+
+  const host = window.location.hostname;
+  const inDevMode = host === "localhost" || host === "127.0.0.1" || host === "[::1]";
+  if (!inDevMode) {
+    return;
+  }
+
+  const canChooseOutputFolder = canUseWebOutputFolderPicker();
+  console.info("[web-output-capability]", {
+    isSecureContext: window.isSecureContext,
+    showDirectoryPickerType: typeof window.showDirectoryPicker,
+    canChooseOutputFolder,
+  });
 }
 
 function shouldShowIOSImportHint() {
@@ -201,7 +221,7 @@ function isFolderPickerUnavailableError(error) {
   }
 
   const code = String(error.name || "");
-  return code === "SecurityError" || code === "NotAllowedError" || code === "NotSupportedError" || code === "TypeError";
+  return code === "SecurityError" || code === "NotSupportedError" || code === "TypeError";
 }
 
 function configureRecommendedDownload() {
@@ -585,7 +605,8 @@ function addWebFiles(files) {
 }
 
 async function pickWebOutputFolder() {
-  if (state.desktopMode || !canUseWebOutputFolderPicker()) {
+  const canChooseOutputFolder = canUseWebOutputFolderPicker();
+  if (state.desktopMode || !canChooseOutputFolder) {
     updateContextHints();
     return;
   }
