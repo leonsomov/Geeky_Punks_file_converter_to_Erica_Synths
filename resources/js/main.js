@@ -9,6 +9,9 @@ const CANCELLED_ERROR_MESSAGE = "Conversion cancelled by user.";
 const CONVERT_SUCCESS_MESSAGE = "Ready, like it should be.";
 const KIT_SUCCESS_MESSAGE = "Ribbit. Export ready. 🐸";
 const TOAST_TIMEOUT_MS = 3000;
+const WEB_OUTPUT_FOLDER_DEFAULT_HINT = "Destination: browser downloads (or pick output folder).";
+const WEB_OUTPUT_FOLDER_UNSUPPORTED_HINT = "Output folder selection is not supported in this browser. Files will download normally.";
+const IOS_IMPORT_HINT = "iOS: select files (folder import is not available).";
 const FFMPEG_LOCAL_ASSETS = {
   ffmpegModule: new URL("../vendor/ffmpeg/index.js", import.meta.url).href,
   ffmpegWorker: new URL("../vendor/ffmpeg/worker.js", import.meta.url).href,
@@ -39,6 +42,7 @@ const elements = {
   normalizeToggle: document.getElementById("normalizeToggle"),
   pickWebOutputBtn: document.getElementById("pickWebOutputBtn"),
   outputHint: document.getElementById("outputHint"),
+  iosImportHint: document.getElementById("iosImportHint"),
   fileCount: document.getElementById("fileCount"),
   progressWrap: document.getElementById("progressWrap"),
   progressLine: document.getElementById("progressLine"),
@@ -147,13 +151,57 @@ function updateContextHints() {
     return;
   }
 
-  const canPickFolder = typeof window.showDirectoryPicker === "function";
+  const canPickFolder = canUseWebOutputFolderPicker();
   elements.pickWebOutputBtn.hidden = !canPickFolder;
-  if (canPickFolder) {
-    elements.outputHint.textContent = "Destination: browser downloads (or pick output folder).";
+  if (canPickFolder && state.outputDirHandle) {
+    elements.outputHint.textContent = `Destination: ${state.outputDirHandle.name}`;
+  } else if (canPickFolder) {
+    elements.outputHint.textContent = WEB_OUTPUT_FOLDER_DEFAULT_HINT;
   } else {
-    elements.outputHint.textContent = "Destination: browser downloads (folder access is not supported in this browser).";
+    state.outputDirHandle = null;
+    elements.outputHint.textContent = WEB_OUTPUT_FOLDER_UNSUPPORTED_HINT;
   }
+
+  if (elements.iosImportHint) {
+    const showIOSHint = shouldShowIOSImportHint();
+    elements.iosImportHint.hidden = !showIOSHint;
+    elements.iosImportHint.textContent = showIOSHint ? IOS_IMPORT_HINT : "";
+  }
+}
+
+function canUseWebOutputFolderPicker() {
+  return (
+    !state.desktopMode &&
+    window.isSecureContext &&
+    typeof window.showDirectoryPicker === "function"
+  );
+}
+
+function shouldShowIOSImportHint() {
+  if (state.desktopMode) {
+    return false;
+  }
+
+  const hasTouch = typeof navigator.maxTouchPoints === "number" && navigator.maxTouchPoints > 1;
+  const hasWKMessageHandlers =
+    typeof window.webkit === "object" &&
+    window.webkit !== null &&
+    typeof window.webkit.messageHandlers === "object";
+  const hasWebkitTouchCallout =
+    typeof CSS !== "undefined" && typeof CSS.supports === "function" && CSS.supports("-webkit-touch-callout", "none");
+  const noOpenFilePicker = typeof window.showOpenFilePicker !== "function";
+  const noDirectoryPicker = typeof window.showDirectoryPicker !== "function";
+
+  return hasTouch && hasWKMessageHandlers && hasWebkitTouchCallout && noOpenFilePicker && noDirectoryPicker;
+}
+
+function isFolderPickerUnavailableError(error) {
+  if (!error || typeof error !== "object") {
+    return false;
+  }
+
+  const code = String(error.name || "");
+  return code === "SecurityError" || code === "NotAllowedError" || code === "NotSupportedError" || code === "TypeError";
 }
 
 function configureRecommendedDownload() {
@@ -537,7 +585,8 @@ function addWebFiles(files) {
 }
 
 async function pickWebOutputFolder() {
-  if (state.desktopMode || typeof window.showDirectoryPicker !== "function") {
+  if (state.desktopMode || !canUseWebOutputFolderPicker()) {
+    updateContextHints();
     return;
   }
 
@@ -547,6 +596,13 @@ async function pickWebOutputFolder() {
     logLine(`Output folder selected: ${state.outputDirHandle.name}`);
   } catch (error) {
     if (error && error.name === "AbortError") {
+      return;
+    }
+    if (isFolderPickerUnavailableError(error)) {
+      state.outputDirHandle = null;
+      elements.pickWebOutputBtn.hidden = true;
+      elements.outputHint.textContent = WEB_OUTPUT_FOLDER_UNSUPPORTED_HINT;
+      logLine(WEB_OUTPUT_FOLDER_UNSUPPORTED_HINT);
       return;
     }
     logLine(`Could not select output folder: ${errorToText(error)}`, "error");

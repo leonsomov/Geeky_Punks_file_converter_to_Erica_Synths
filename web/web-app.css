@@ -22,6 +22,16 @@ body {
   padding-top: 6px;
 }
 
+.ios-install-hint {
+  margin: 2px 0 0;
+  font-size: 0.72rem;
+  text-align: center;
+}
+
+.ios-import-hint {
+  margin-top: 0;
+}
+
 .panel-main {
   padding: 12px;
 }
