@@ -147,12 +147,12 @@ h3 {
 .control-row,
 .action-row {
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   gap: 8px;
-  width: min(760px, 100%);
-  margin: 0 auto;
+  width: auto;
+  margin: 0;
 }
 
 .action-row {
