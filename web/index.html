@@ -3,8 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#e4e1e2" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Geeky Punks Converter" />
     <title>Geeky Punks converter</title>
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="./icons/icon-192.png" />
     <link rel="stylesheet" href="../resources/styles.css" />
+    <link rel="stylesheet" href="./web-app.css" />
   </head>
   <body>
     <main class="app-shell">
@@ -24,6 +31,7 @@
           <button id="pickFilesBtn" class="btn btn-primary" type="button">Import Audio</button>
           <button id="clearFilesBtn" class="btn btn-secondary" type="button">Clear</button>
           <button id="manualBtn" class="btn btn-secondary" type="button">Manual</button>
+          <button id="installAppBtn" class="btn btn-secondary" type="button" hidden>Install App</button>
           <button id="pickWebOutputBtn" class="btn btn-secondary" type="button" hidden>Choose Output Folder</button>
         </div>
 
@@ -112,6 +120,7 @@ If macOS blocks it: System Settings → Privacy & Security → Open Anyway.</pre
 
     <input id="webFileInput" class="file-input-native" type="file" multiple accept="audio/*" />
 
+    <script src="./pwa.js"></script>
     <script type="module" src="../resources/js/main.js"></script>
   </body>
 </html>

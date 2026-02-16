@@ -1,0 +1,20 @@
+{
+  "name": "Geeky Punks Converter",
+  "short_name": "Converter",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#e4e1e2",
+  "theme_color": "#e4e1e2",
+  "icons": [
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

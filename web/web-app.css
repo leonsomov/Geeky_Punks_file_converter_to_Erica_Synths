@@ -1,0 +1,49 @@
+:root {
+  --web-frame-width: 980px;
+}
+
+body {
+  padding: 16px 10px 26px;
+}
+
+.app-shell {
+  width: min(var(--web-frame-width), 100%);
+  margin: 0 auto;
+  padding: 14px;
+  border: 1px solid var(--ink);
+  box-shadow: 0 12px 30px rgba(13, 13, 13, 0.11);
+}
+
+.brand-head {
+  position: sticky;
+  top: 8px;
+  z-index: 20;
+  background: var(--page);
+  padding-top: 6px;
+}
+
+.panel-main {
+  padding: 12px;
+}
+
+.download-panel {
+  padding: 12px;
+}
+
+@media (max-width: 640px) {
+  body {
+    padding: 10px 0 18px;
+  }
+
+  .app-shell {
+    padding: 10px;
+    border-left: 0;
+    border-right: 0;
+    box-shadow: none;
+  }
+
+  .panel-main,
+  .download-panel {
+    padding: 10px;
+  }
+}

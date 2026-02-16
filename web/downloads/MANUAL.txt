@@ -1,35 +1,20 @@
-Geeky Punks Converter
-Quick Manual
+===========================
+GEEKY PUNKS CONVERTER
+THE SOUND OF EVERYTHING
+===========================
 
-What this app does
-Converts audio files to WAV mono 48kHz 16 bit, ready for Erica Synths workflows.
+Manual
 
 Convert Files
-1) Import Audio
-2) Optional: enable Normalize
-3) Click Convert Files
-Output: converted WAV files saved to your output folder or downloads list
+Import audio, optional Normalize, then Convert Files.
+Output: WAV files saved to your output folder or downloads.
 
 Kit Maker
-Limit: up to 10 files
-1) Select 1 to 10 files
-2) Click Kit Maker
-Output: folder H with samples numbered 0 to 9
+Select up to 10 files, then Kit Maker.
+Output: one folder H with samples numbered 0 to 9.
 
-Install on macOS
-1) Open the downloaded DMG
-2) Drag Geeky Punks Converter to Applications
-3) Open Applications and launch the app
-If macOS blocks it
-System Settings → Privacy & Security → Open Anyway → Confirm Open
-
-Install on Windows
-1) Unzip the download if needed
-2) Run the installer or open the app
-If Windows warns you
-Click More info → Run anyway
-
-Install on Linux
-1) Extract the archive if needed
-2) Run the AppImage or binary
-If needed, allow execution on the file in Properties
+PWA Web App
+PWA means you can install the web version like an app.
+Open the web link, then install it.
+Chrome: click Install App in the page, or use the browser menu → Install.
+Safari on iPhone/iPad: Share → Add to Home Screen.
