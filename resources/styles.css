@@ -158,6 +158,16 @@ h3 {
   gap: 8px;
 }
 
+.action-row > .btn,
+.action-row > .toggle-wrap {
+  width: 230px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
 .btn {
   border: 1px solid var(--ink);
   border-radius: 0;
@@ -195,14 +205,12 @@ h3 {
 }
 
 .toggle-wrap {
-  display: inline-flex;
-  align-items: center;
   gap: 5px;
   border: 1px solid var(--ink);
   border-radius: 0;
   background: var(--track);
   color: var(--ink);
-  padding: 7px 8px;
+  padding: 0 8px;
   font-size: 0.72rem;
   font-family: "Climate Ice", "Arial Narrow", sans-serif;
   text-transform: uppercase;
