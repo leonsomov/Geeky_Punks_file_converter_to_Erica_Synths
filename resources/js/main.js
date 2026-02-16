@@ -42,6 +42,8 @@ const elements = {
   conflictModal: document.getElementById("conflictModal"),
   conflictText: document.getElementById("conflictText"),
   conflictButtons: Array.from(document.querySelectorAll("[data-decision]")),
+  recommendedDownloadBtn: document.getElementById("recommendedDownloadBtn"),
+  recommendedDownloadHint: document.getElementById("recommendedDownloadHint"),
 };
 
 boot();
@@ -61,6 +63,7 @@ function boot() {
     return;
   }
 
+  configureRecommendedDownload();
   setStatus("Ready. Import audio to convert.", "info");
   logLine("Web mode active. Choose an output folder to keep files together.");
 }
@@ -124,6 +127,55 @@ function updateContextHints() {
   } else {
     elements.outputHint.textContent = "Destination: browser downloads (folder access is not supported in this browser).";
   }
+}
+
+function configureRecommendedDownload() {
+  if (!elements.recommendedDownloadBtn) {
+    return;
+  }
+
+  const source = detectBrowserSystem();
+  elements.recommendedDownloadBtn.href = source.href;
+  elements.recommendedDownloadBtn.textContent = source.label;
+  if (elements.recommendedDownloadHint) {
+    elements.recommendedDownloadHint.textContent = source.hint;
+  }
+}
+
+function detectBrowserSystem() {
+  const userAgent = (navigator.userAgent || "").toLowerCase();
+  const platform = (navigator.platform || "").toLowerCase();
+  const probe = `${userAgent} ${platform}`;
+
+  if (probe.includes("win")) {
+    return {
+      label: "Download for Windows",
+      href: "./downloads/Geeky-Punks-converter-windows-x64-v1.0.11.zip",
+      hint: "Detected: Windows browser.",
+    };
+  }
+
+  if (probe.includes("linux")) {
+    return {
+      label: "Download for Linux",
+      href: "./downloads/Geeky-Punks-converter-linux-x64-v1.0.11.zip",
+      hint: "Detected: Linux browser.",
+    };
+  }
+
+  if (probe.includes("mac")) {
+    return {
+      label: "Download for macOS",
+      href: "./downloads/Geeky-Punks-converter-mac-arm64-v1.0.11.dmg",
+      hint: "Detected: macOS browser (ARM build by default).",
+    };
+  }
+
+  return {
+    label: "Open All Downloads",
+    href: "./downloads/index.html",
+    hint: "System not detected. Choose your build from All Downloads.",
+  };
 }
 
 function renderFileList() {
